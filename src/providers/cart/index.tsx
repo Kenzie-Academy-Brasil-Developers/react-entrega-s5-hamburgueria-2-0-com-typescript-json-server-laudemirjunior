@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { number } from "yup";
 import api from "../../services";
 
 interface CartProps {
@@ -42,12 +43,12 @@ export const CartContext = createContext<CartProviderData>(
 
 export const CartProvider = ({ children }: CartProps) => {
   const [cart, setCart] = useState<ProductData[]>([] as ProductData[]);
-
-  const [accessToken] = useState(localStorage.getItem("accessToken"));
+  const accessToken = localStorage.getItem("accessToken");
+  const userId = localStorage.getItem("userId");
 
   const search = () => {
     api
-      .get("/cart", {
+      .get(`/cart?userId=${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -56,20 +57,18 @@ export const CartProvider = ({ children }: CartProps) => {
       .catch((err) => console.log(err));
   };
 
-  useEffect(() => {
-    if (accessToken) {
-      return search();
-    }
-  }, []);
-
   const addCart = (item: ItemData) => {
-    if (cart.every((str) => str.title !== item.title)) {
+    if (cart.every((str) => str.id !== item.id)) {
       api
-        .post("/cart", item, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        })
+        .post(
+          "/cart",
+          { ...item, userId: Number(userId) },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        )
         .then(() => {
           search();
         })
@@ -110,7 +109,7 @@ export const CartProvider = ({ children }: CartProps) => {
   const addOrMenus = (quantity: number, total: number, id: number) => {
     api
       .patch(
-        `/cart/${id}`,
+        `/cart?userId=${userId}/${id}`,
         { quantity: quantity, total: total },
         {
           headers: {
@@ -121,6 +120,12 @@ export const CartProvider = ({ children }: CartProps) => {
       .then(() => search())
       .catch((err) => console.log(err));
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("accessToken")) {
+      search();
+    }
+  }, []);
 
   return (
     <CartContext.Provider

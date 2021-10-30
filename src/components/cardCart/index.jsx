@@ -7,7 +7,6 @@ import { AiOutlineClose } from "react-icons/ai";
 
 export default function CardCart({ close }) {
   const { cart, removeAll } = useContext(CartContext);
-  console.log(cart);
   return (
     <MainContainer>
       {

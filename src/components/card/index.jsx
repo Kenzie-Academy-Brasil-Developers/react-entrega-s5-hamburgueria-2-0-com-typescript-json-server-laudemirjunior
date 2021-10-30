@@ -9,7 +9,7 @@ export default function Card({ item }) {
 
   const disable = () => {
     setDes(true);
-    setTimeout(() => setDes(false), 2000);
+    setTimeout(() => setDes(false), 1000);
   };
 
   return (
