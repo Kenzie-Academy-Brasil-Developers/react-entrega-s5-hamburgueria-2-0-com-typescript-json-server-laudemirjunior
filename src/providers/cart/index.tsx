@@ -43,8 +43,8 @@ export const CartContext = createContext<CartProviderData>(
 
 export const CartProvider = ({ children }: CartProps) => {
   const [cart, setCart] = useState<ProductData[]>([] as ProductData[]);
-  const accessToken = localStorage.getItem("accessToken");
-  const userId = localStorage.getItem("userId");
+  const [accessToken] = useState(localStorage.getItem("accessToken"));
+  const [userId] = useState(localStorage.getItem("userId"));
 
   const search = () => {
     api
@@ -53,9 +53,12 @@ export const CartProvider = ({ children }: CartProps) => {
           Authorization: `Bearer ${accessToken}`,
         },
       })
-      .then((response) => setCart(response.data))
-      .catch((err) => console.log(err));
+      .then((response) => setCart(response.data));
   };
+
+  useEffect(() => {
+    search();
+  });
 
   const addCart = (item: ItemData) => {
     if (cart.every((str) => str.id !== item.id)) {
@@ -71,8 +74,8 @@ export const CartProvider = ({ children }: CartProps) => {
         )
         .then(() => {
           search();
-        })
-        .catch((err) => console.log(err));
+          toast.success("Produto adicionado ao carrinho!");
+        });
     } else {
       toast.error("O produto selecionado já existe em seu carrinho!");
     }
@@ -87,29 +90,29 @@ export const CartProvider = ({ children }: CartProps) => {
       })
       .then(() => {
         search();
-      })
-      .catch((err) => console.log(err));
+        toast.success("Produto removido com sucesso!");
+      });
   };
 
   const removeAll = () => {
-    cart.map(async (item) => {
-      try {
-        await api.delete(`/cart/${item.id}`, {
+    cart.map((item) => {
+      api
+        .delete(`/cart/${item.id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
+        })
+        .then(() => {
+          search();
+          toast.success("Carrinho limpo com sucesso!");
         });
-        search();
-      } catch (err) {
-        return console.log(err);
-      }
     });
   };
 
   const addOrMenus = (quantity: number, total: number, id: number) => {
     api
       .patch(
-        `/cart?userId=${userId}/${id}`,
+        `/cart/${id}`,
         { quantity: quantity, total: total },
         {
           headers: {
@@ -117,15 +120,8 @@ export const CartProvider = ({ children }: CartProps) => {
           },
         }
       )
-      .then(() => search())
-      .catch((err) => console.log(err));
+      .then(() => search());
   };
-
-  useEffect(() => {
-    if (localStorage.getItem("accessToken")) {
-      search();
-    }
-  }, []);
 
   return (
     <CartContext.Provider

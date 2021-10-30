@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 import { History } from "history";
 import api from "../../services";
+import toast from "react-hot-toast";
 
 interface AuthProps {
   children: ReactNode;
@@ -39,7 +40,10 @@ export const AuthProvider = ({ children }: AuthProps) => {
       .then(() => {
         history.push("/");
       })
-      .catch((err) => console.log(err));
+      .then(() => toast.success("Sua conta foi criada com sucesso!"))
+      .catch(() =>
+        toast.error("Erro ao criar sua conta, tente novamente com outro email!")
+      );
   };
 
   const signIn = (userData: UserData, history: History) => {
@@ -50,14 +54,16 @@ export const AuthProvider = ({ children }: AuthProps) => {
         localStorage.setItem("userId", response.data.user.id);
         setAuthToken(response.data.accessToken);
         history.push("/dashboard");
+        toast.success("Bem vindo novamente!");
       })
-      .catch((err) => console.log(err));
+      .catch(() => toast.error("Email ou senha incorreta!"));
   };
 
   const logOut = (history: History) => {
     localStorage.clear();
     setAuthToken("");
     history.push("/");
+    toast.success("Até logo!");
   };
 
   return (

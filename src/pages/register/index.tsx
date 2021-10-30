@@ -77,7 +77,7 @@ export default function Register() {
           </div>
         </Phrase>
         <Field>
-          {array.map((item) => (
+          {array.map(() => (
             <Ball />
           ))}
         </Field>
