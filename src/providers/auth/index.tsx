@@ -19,7 +19,8 @@ interface UserRegisterData {
 }
 
 interface AuthProviderData {
-  authToken: string;
+  token: string;
+  id: string;
   signIn: (userData: UserData, history: History) => void;
   logOut: (history: History) => void;
   singUp: (userData: UserRegisterData, history: History) => void;
@@ -30,9 +31,10 @@ export const AuthContext = createContext<AuthProviderData>(
 );
 
 export const AuthProvider = ({ children }: AuthProps) => {
-  const [authToken, setAuthToken] = useState(
-    () => localStorage.getItem("accessToken") || ""
+  const [token, setToken] = useState<string>(
+    () => localStorage.getItem("token") || ""
   );
+  const [id, setId] = useState<string>(() => localStorage.getItem("id") || "");
 
   const singUp = (userData: UserRegisterData, history: History) => {
     api
@@ -50,10 +52,14 @@ export const AuthProvider = ({ children }: AuthProps) => {
     api
       .post("/login", userData)
       .then((response) => {
-        localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem("userId", response.data.user.id);
-        setAuthToken(response.data.accessToken);
+        localStorage.setItem("token", response.data.accessToken);
+        setToken(response.data.accessToken);
+
+        localStorage.setItem("id", response.data.user.id);
+        setId(response.data.user.id);
+
         history.push("/dashboard");
+
         toast.success("Bem vindo novamente!");
       })
       .catch(() => toast.error("Email ou senha incorreta!"));
@@ -61,14 +67,16 @@ export const AuthProvider = ({ children }: AuthProps) => {
 
   const logOut = (history: History) => {
     localStorage.clear();
-    setAuthToken("");
+    setToken("");
     history.push("/");
     toast.success("Até logo!");
   };
 
   return (
-    <AuthContext.Provider value={{ authToken, logOut, singUp, signIn }}>
+    <AuthContext.Provider value={{ logOut, singUp, signIn, token, id }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);

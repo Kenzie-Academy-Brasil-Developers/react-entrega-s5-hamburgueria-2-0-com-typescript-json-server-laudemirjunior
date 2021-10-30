@@ -1,7 +1,13 @@
-import { createContext, ReactNode, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import toast from "react-hot-toast";
-import { number } from "yup";
 import api from "../../services";
+import { useAuth } from "../auth";
 
 interface CartProps {
   children: ReactNode;
@@ -42,50 +48,46 @@ export const CartContext = createContext<CartProviderData>(
 );
 
 export const CartProvider = ({ children }: CartProps) => {
+  const { token, id } = useAuth();
+
   const [cart, setCart] = useState<ProductData[]>([] as ProductData[]);
-  const [accessToken] = useState(localStorage.getItem("accessToken"));
-  const [userId] = useState(localStorage.getItem("userId"));
-
-  const search = () => {
-    api
-      .get(`/cart?userId=${userId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-      .then((response) => setCart(response.data));
-  };
-
-  useEffect(() => {
-    search();
-  });
 
   const addCart = (item: ItemData) => {
+    console.log(token, id);
+    let data = { ...item, userId: id };
     if (cart.every((str) => str.id !== item.id)) {
       api
-        .post(
-          "/cart",
-          { ...item, userId: Number(userId) },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        )
+        .post("/cart", data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         .then(() => {
           search();
           toast.success("Produto adicionado ao carrinho!");
-        });
+        })
+        .catch((err) => console.log(err));
     } else {
       toast.error("O produto selecionado já existe em seu carrinho!");
     }
   };
 
+  const search = useCallback(() => {
+    api
+      .get(`/cart?userId=${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => setCart(response.data))
+      .catch((err) => console.log(err));
+  }, [id]);
+
   const remove = (id: number) => {
     api
       .delete(`/cart/${id}`, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
       })
       .then(() => {
@@ -95,19 +97,23 @@ export const CartProvider = ({ children }: CartProps) => {
   };
 
   const removeAll = () => {
-    cart.map((item) => {
-      api
+    cart.map(async (item) => {
+      await api
         .delete(`/cart/${item.id}`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         })
         .then(() => {
           search();
-          toast.success("Carrinho limpo com sucesso!");
         });
     });
+    toast.success("Carrinho limpo com sucesso!");
   };
+
+  useEffect(() => {
+    search();
+  }, [search]);
 
   const addOrMenus = (quantity: number, total: number, id: number) => {
     api
@@ -116,7 +122,7 @@ export const CartProvider = ({ children }: CartProps) => {
         { quantity: quantity, total: total },
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       )

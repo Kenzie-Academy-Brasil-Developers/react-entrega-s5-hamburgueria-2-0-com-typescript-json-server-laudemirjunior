@@ -14,7 +14,7 @@ export default function Dashboard() {
     setShow(!show);
   };
 
-  if (!localStorage.getItem("accessToken")) {
+  if (!localStorage.getItem("token")) {
     return <Redirect to="/" />;
   }
 
