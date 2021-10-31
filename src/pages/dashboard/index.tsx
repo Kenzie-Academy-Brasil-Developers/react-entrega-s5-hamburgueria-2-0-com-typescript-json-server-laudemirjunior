@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { Redirect } from "react-router";
-import Bar from "../../components/bar";
-import Card from "../../components/card";
-import CardCart from "../../components/cardCart";
+import Bar from "../../components/bar/index";
+import Card from "../../components/card/index";
+import CardCart from "../../components/cardCart/index";
 import { ProductsContext } from "../../providers/products";
 import { Container } from "./styles";
 
@@ -22,8 +22,8 @@ export default function Dashboard() {
     <div>
       <Bar close={close} />
       <Container>
-        {products.map((item) => {
-          return <Card item={item} />;
+        {products.map((item, index) => {
+          return <Card key={index} item={item as any} />;
         })}
       </Container>
       {show && <CardCart close={close} />}

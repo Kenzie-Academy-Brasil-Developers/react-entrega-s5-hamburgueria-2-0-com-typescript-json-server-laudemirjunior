@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { MdLogout } from "react-icons/md";
 import { RiShoppingCart2Fill } from "react-icons/ri";
@@ -9,7 +9,11 @@ import { AuthContext } from "../../providers/auth";
 import { CartContext } from "../../providers/cart";
 import { ProductsContext } from "../../providers/products";
 
-export default function Bar({ close }) {
+interface Props {
+  close: Function;
+}
+
+export default function Bar({ close }: Props) {
   const history = useHistory();
   const { logOut } = useContext(AuthContext);
   const [show, setShow] = useState(true);
@@ -48,7 +52,7 @@ export default function Bar({ close }) {
           {!show && <AiOutlineSearch onClick={() => setShow(!show)} />}
           <Cart>
             <span>{cart.length}</span>
-            <RiShoppingCart2Fill onClick={close} />
+            <RiShoppingCart2Fill onClick={() => close()} />
           </Cart>
           <Log>
             <MdLogout onClick={() => logOut(history)} />

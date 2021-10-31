@@ -1,9 +1,24 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { CartContext } from "../../providers/cart";
-import Button from "../button";
+import Button from "../button/index";
 import { Container } from "./styles";
 
-export default function Card({ item }) {
+interface ItemData {
+  title: string;
+  type: string;
+  price: number;
+  image: string;
+  userId: number;
+  id: number;
+  quantity: number;
+  total: number;
+}
+
+interface Props {
+  item: ItemData;
+}
+
+export default function Card({ item }: Props) {
   const { addCart } = useContext(CartContext);
   const [des, setDes] = useState(false);
 
@@ -29,7 +44,7 @@ export default function Card({ item }) {
         <div>
           <Button
             disabled={des}
-            color
+            color={true}
             onClick={() => {
               addCart({ ...item, quantity: 1, total: item.price });
               disable();

@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import { FiShoppingBag } from "react-icons/fi";
 import { Redirect, useHistory } from "react-router";
-import Button from "../../components/button";
-import Input from "../../components/input";
+import Button from "../../components/button/index";
+import Input from "../../components/input/index";
 import logo from "../../image/Mask Group.png";
 import { AuthContext } from "../../providers/auth";
 import * as yup from "yup";
@@ -72,7 +72,7 @@ export default function Login() {
           error={errors.password?.message}
         />
         <Buttons>
-          <Button style={{ height: "60px" }} color type="submit">
+          <Button style={{ height: "60px" }} color={true} type="submit">
             Logar
           </Button>
         </Buttons>

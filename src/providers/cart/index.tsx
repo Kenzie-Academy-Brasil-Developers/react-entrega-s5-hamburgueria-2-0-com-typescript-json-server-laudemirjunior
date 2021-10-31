@@ -12,18 +12,7 @@ import { useAuth } from "../auth";
 interface CartProps {
   children: ReactNode;
 }
-
 interface ProductData {
-  title: string;
-  type: string;
-  price: number;
-  image: string;
-  userId: number;
-  id: number;
-  quantity: number;
-}
-
-interface ItemData {
   title: string;
   type: string;
   price: number;
@@ -37,7 +26,7 @@ interface ItemData {
 interface CartProviderData {
   search: () => void;
   cart: ProductData[];
-  addCart: (item: ItemData) => void;
+  addCart: (item: ProductData) => void;
   addOrMenus: (quantity: number, total: number, id: number) => void;
   remove: (id: number) => void;
   removeAll: (value: number) => void;
@@ -52,7 +41,7 @@ export const CartProvider = ({ children }: CartProps) => {
 
   const [cart, setCart] = useState<ProductData[]>([] as ProductData[]);
 
-  const addCart = (item: ItemData) => {
+  const addCart = (item: ProductData) => {
     console.log(token, id);
     let data = { ...item, userId: id };
     if (cart.every((str) => str.id !== item.id)) {
@@ -81,6 +70,7 @@ export const CartProvider = ({ children }: CartProps) => {
       })
       .then((response) => setCart(response.data))
       .catch((err) => console.log(err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const remove = (id: number) => {
